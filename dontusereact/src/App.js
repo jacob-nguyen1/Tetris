@@ -255,7 +255,7 @@ function App() {
     }, 500);
 
     return () => clearInterval(interval);
-  }, [activePieceTiles]);
+  }, [fallPiece]);
 
   return (
     <div className="App">

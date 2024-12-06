@@ -1,0 +1,52 @@
+.board {
+    display: grid;
+    grid-template-rows: repeat(21, 40px);
+    grid-template-columns: repeat(10, 40px);
+    width: 400px;
+    height: 840px;
+}
+
+.tile {
+    border: 1px solid;
+    margin-right: -1px;
+    margin-bottom: -1px;
+}
+
+.top-row {
+    background-color: white;
+    border: none;
+}
+
+.none {
+    background-color: lightgray;
+}
+
+.O {
+    background-color: yellow;
+}
+
+.I {
+    background-color: cyan;
+}
+
+.S {
+    background-color: greenyellow;
+}
+
+.Z {
+    background-color: red;
+}
+
+.J {
+    background-color: blue;
+}
+
+.L {
+    background-color: orange;
+}
+
+.T {
+    background-color: purple;
+}
+  
+  
