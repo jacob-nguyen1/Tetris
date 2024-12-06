@@ -12,8 +12,6 @@ let bag = []
 /*
 TO DO
 
-- rotation collision detection (+ out of bounds)
-- left and right collision detection
 - soft drop
 - ARR DAS and the other one
 - hold piece
@@ -22,6 +20,20 @@ TO DO
 - death screen
 - SRS spins???
 */
+
+let fallPieceTimer;
+
+const startTimer = () => {
+    fallPieceTimer = setInterval(() => {
+        fallPiece();
+        updateBoard();
+    }, 500)
+}
+
+const resetTimer = () => {
+    clearInterval(fallPieceTimer);
+    startTimer();
+}
 
 for (let r = 0; r < 21; r++) {
     for (let c = 0; c < 10; c++) {
@@ -117,6 +129,7 @@ const fallPiece = () => {
         (board[r+1][c] !== 0 &&
         !activePieceTiles.some(([r_,c_]) => r_ === r+1 && c_ === c)
         ))) {
+        clearLines();
         spawnNextPiece();
     } else {
         activePieceTiles.forEach(([r,c]) => 
@@ -134,7 +147,10 @@ const fallPiece = () => {
 const movePiece = (dir) => {
     switch (dir) {
         case "left":
-            if (!activePieceTiles.some(([_,c]) => c === 0)) {
+            if (!activePieceTiles.some(([r,c]) => c === 0 ||
+            (board[r][c-1] !== 0 &&
+                !activePieceTiles.some(([r_,c_]) => r_ === r && c_ === c-1)
+            ))) {
                 activePieceTiles.forEach(([r,c]) => 
                     board[r][c] = 0
                 )
@@ -142,10 +158,20 @@ const movePiece = (dir) => {
                     board[r][c-1] = activePiece
                 );
                 activePieceTiles = activePieceTiles.map(([r,c]) => [r,c-1])
+                if (activePieceTiles.some(([r,c]) => 
+                    r === 20 ||
+                    (board[r+1][c] !== 0 &&
+                    !activePieceTiles.some(([r_,c_]) => r_ === r+1 && c_ === c)
+                    ))) {
+                    resetTimer();
+                }
             }
             break;
         case "right":
-            if (!activePieceTiles.some(([_,c]) => c === 9)) {
+            if (!activePieceTiles.some(([r,c]) => c === 9 ||
+            (board[r][c+1] !== 0 &&
+                !activePieceTiles.some(([r_,c_]) => r_ === r && c_ === c+1)
+            ))) {
                 activePieceTiles.forEach(([r,c]) => 
                     board[r][c] = 0
                 )
@@ -153,6 +179,13 @@ const movePiece = (dir) => {
                     board[r][c+1] = activePiece
                 );
                 activePieceTiles = activePieceTiles.map(([r,c]) => [r,c+1])
+                if (activePieceTiles.some(([r,c]) => 
+                    r === 20 ||
+                    (board[r+1][c] !== 0 &&
+                    !activePieceTiles.some(([r_,c_]) => r_ === r+1 && c_ === c)
+                    ))) {
+                    resetTimer();
+                }
             }
             break;
     }
@@ -175,14 +208,37 @@ const hardDrop = () => {
             board[r][c] = activePiece
         );
     }
+    clearLines();
+    spawnNextPiece();
+}
+
+const softDrop = () => {
+    let a = activePieceTiles[0][0]
+    while (!activePieceTiles.some(([r,c]) => 
+        r === 20 ||
+        (board[r+1][c] !== 0 &&
+        !activePieceTiles.some(([r_,c_]) => r_ === r+1 && c_ === c)
+        ))) {
+
+        activePieceTiles.forEach(([r,c]) => 
+            board[r][c] = 0
+        );
+        
+        activePieceTiles = activePieceTiles.map(([r,c]) => [r+1, c]);
+        
+        activePieceTiles.forEach(([r,c]) => 
+            board[r][c] = activePiece
+        );
+        b = activePieceTiles[0][0]
+    }
+    if (a !== b) {
+        resetTimer();
+    }
 }
 
 const rotatePiece = (dir) => {
-    activePieceTiles.forEach(([r,c]) => 
-        board[r][c] = 0
-    );
-
-    let a = activePieceTiles.map(tile => [...tile]);
+    let a = JSON.parse(JSON.stringify(activePieceTiles));
+    let r = rotation
 
     switch(activePiece) {
         case "O":
@@ -605,11 +661,50 @@ const rotatePiece = (dir) => {
             break;
     }
 
-    activePieceTiles = a.map(tile => [...tile]);
     activePieceTiles.forEach(([r,c]) => 
-    board[r][c] = activePiece
-)
+        board[r][c] = 0
+    );
+
+    if (a.some(([r,c]) =>
+        r > 20 || c < 0 || c > 9 ||
+        (board[r][c] !== 0 &&
+        !activePieceTiles.some((r_,c_) => r_ === r && c_ === c))
+    )) {
+        activePieceTiles.forEach(([r,c]) => 
+            board[r][c] = activePiece
+        );
+        rotation = r;
+    } else {
+        activePieceTiles = a.map(tile => [...tile]);
+
+        activePieceTiles.forEach(([r,c]) => 
+        board[r][c] = activePiece
+        );
+    }
 }
+
+const clearLines = () => {
+    for (let i = 1; i < board.length; i++) {
+        if (board[i].every((val) => val !== 0)) {
+            for (let j = 0; j < 10; j++) {
+                board[i][j] = 0;
+            }
+
+            for (let k = i; k > 1; k--) {
+                for (let j = 0; j < 10; j++) {
+                    board[k][j] = board[k-1][j];
+                }
+            }
+        }
+    }
+}
+
+let leftHeld = false;
+let leftKeyTimer;
+let leftKeyInterval;
+let rightHeld = false;
+let rightKeyTimer;
+let rightKeyInterval;
 
 document.addEventListener('keydown', (event) => {
     switch(event.key) {
@@ -619,16 +714,37 @@ document.addEventListener('keydown', (event) => {
             updateBoard();
             break;
         case 'ArrowLeft':
-            movePiece('left');
-            updateBoard();
+            if (!leftHeld) {
+                movePiece('left');
+                updateBoard();
+            }
+            leftHeld = true;
+            leftKeyTimer = setTimeout(() => {
+                leftKeyInterval = setInterval(() => {
+                    movePiece('left');
+                    updateBoard();
+                }, 1);
+            }, 200);
             break;
         case 'ArrowRight':
-            movePiece('right');
-            updateBoard();
+            if (!rightHeld) {
+                movePiece('right');
+                updateBoard();
+            }
+            rightHeld = true;
+            rightKeyTimer = setTimeout(() => {
+                rightKeyInterval = setInterval(() => {
+                    movePiece('right');
+                    updateBoard();
+                }, 1);
+            }, 200);
             break;
         case 'ArrowUp':
             hardDrop();
-            spawnNextPiece();
+            updateBoard();
+            break;
+        case 'ArrowDown':
+            softDrop();
             updateBoard();
             break;
         case 'z':
@@ -645,12 +761,26 @@ document.addEventListener('keydown', (event) => {
             updateBoard();
             break;
     }
-})
+});
+
+document.addEventListener('keyup', (event) => {
+    switch(event.key) {
+        case 'ArrowLeft':
+            clearTimeout(leftKeyTimer);
+            clearInterval(leftKeyInterval);
+            leftHeld = false;
+            break;
+        case 'ArrowRight':
+            clearTimeout(rightKeyTimer);
+            clearInterval(rightKeyInterval);
+            rightHeld = false;
+            break;
+        default:
+            break;
+    }
+});
 
 spawnNextPiece();
 updateBoard();
 
-setInterval(() => {
-    fallPiece();
-    updateBoard();
-}, 500)
+startTimer();
