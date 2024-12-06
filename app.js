@@ -8,6 +8,7 @@ let rotation = 0;
 
 let pieces = ['O', 'I', 'S', 'Z', 'J', 'L', 'T']
 let bag = []
+let hold = ''
 
 /*
 TO DO
@@ -723,8 +724,8 @@ document.addEventListener('keydown', (event) => {
                 leftKeyInterval = setInterval(() => {
                     movePiece('left');
                     updateBoard();
-                }, 1);
-            }, 200);
+                }, 0);
+            }, 133);
             break;
         case 'ArrowRight':
             if (!rightHeld) {
@@ -736,8 +737,8 @@ document.addEventListener('keydown', (event) => {
                 rightKeyInterval = setInterval(() => {
                     movePiece('right');
                     updateBoard();
-                }, 1);
-            }, 200);
+                }, 0);
+            }, 133);
             break;
         case 'ArrowUp':
             hardDrop();
@@ -760,6 +761,14 @@ document.addEventListener('keydown', (event) => {
             rotatePiece("right");
             updateBoard();
             break;
+        case 'a':
+            hold = activePiece
+            activePieceTiles.forEach(([r,c]) => 
+                board[r][c] = 0
+            )
+            spawnNextPiece();
+            updateBoard();
+
     }
 });
 
