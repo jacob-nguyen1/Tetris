@@ -4,6 +4,7 @@
     grid-template-columns: repeat(10, 40px);
     width: 400px;
     height: 840px;
+    margin: auto
 }
 
 .tile {
@@ -13,12 +14,12 @@
 }
 
 .top-row {
-    background-color: white;
+    background-color: black;
     border: none;
 }
 
 .none {
-    background-color: lightgray;
+    background-color: darkgray;
 }
 
 .O {

@@ -12,7 +12,8 @@ let bag = []
 /*
 TO DO
 
-- rotation collision detection
+- rotation collision detection (+ out of bounds)
+- left and right collision detection
 - soft drop
 - ARR DAS and the other one
 - hold piece
@@ -610,14 +611,6 @@ const rotatePiece = (dir) => {
 )
 }
 
-spawnNextPiece();
-updateBoard();
-
-setInterval(() => {
-    fallPiece();
-    updateBoard();
-}, 500)
-
 document.addEventListener('keydown', (event) => {
     switch(event.key) {
         case 'r':
@@ -646,5 +639,18 @@ document.addEventListener('keydown', (event) => {
             rotatePiece("right");
             updateBoard();
             break;
+        case 'c':
+            rotatePiece("right");
+            rotatePiece("right");
+            updateBoard();
+            break;
     }
 })
+
+spawnNextPiece();
+updateBoard();
+
+setInterval(() => {
+    fallPiece();
+    updateBoard();
+}, 500)
