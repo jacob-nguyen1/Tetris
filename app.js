@@ -6,9 +6,10 @@ let activePieceTiles = [[-1,-1],[-1,-1],[-1,-1],[-1,-1]];
 let activePiece = -1;
 let rotation = 0;
 
-let pieces = ['O', 'I', 'S', 'Z', 'J', 'L', 'T']
-let bag = []
-let hold = ''
+let pieces = ['O', 'I', 'S', 'Z', 'J', 'L', 'T'];
+let bag = [];
+let hold = '';
+let canHold = true;
 
 /*
 TO DO
@@ -88,6 +89,7 @@ const spawnNextPiece = () => {
         }
         spawnPiece(bag.pop())
     }
+    canHold = true;
 }
 
 const spawnPiece = (piece) => {
@@ -762,13 +764,17 @@ document.addEventListener('keydown', (event) => {
             updateBoard();
             break;
         case 'a':
-            hold = activePiece
-            activePieceTiles.forEach(([r,c]) => 
-                board[r][c] = 0
-            )
-            spawnNextPiece();
-            updateBoard();
-
+            if (canHold) {
+                if (hold) {
+                    bag.push(hold)
+                }
+                hold = activePiece;
+                activePieceTiles.forEach(([r,c]) => board[r][c] = 0);
+                document.getElementById("hold-text").innerHTML = hold;
+                spawnNextPiece();
+                canHold = false;
+                updateBoard();
+            }
     }
 });
 

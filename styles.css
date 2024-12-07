@@ -1,10 +1,36 @@
+body {
+    background-color: black;
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+}
+
+.app {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.hold {
+    width: 100px;
+    height: 100px;
+    border: solid white 1px;
+    margin-top: 50px;
+}
+
+.hold-text {
+    text-align: center;
+    color: white;
+}
+
 .board {
     display: grid;
     grid-template-rows: repeat(21, 40px);
     grid-template-columns: repeat(10, 40px);
     width: 400px;
     height: 840px;
-    margin: auto
+    margin-left: 10px;
+    margin-bottom: 0px;
 }
 
 .tile {
